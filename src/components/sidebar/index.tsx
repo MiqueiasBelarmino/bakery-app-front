@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Home, LogOut, Package, Package2, PanelBottom } from "lucide-react";
 import { DashboardIcon } from "@radix-ui/react-icons";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Sidebar() {
     return (

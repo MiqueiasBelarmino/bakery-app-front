@@ -9,7 +9,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <>
       <Sidebar />
-      <main className="flex-grow p-4">
+      <main className="sm:ml-16 p-4">
         {children}
       </main>
     </>
