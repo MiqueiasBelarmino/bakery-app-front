@@ -1,11 +1,24 @@
 import { Card, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "../ui/button";
+import { useState } from "react";
+import { SheetSide } from "../sheet";
 
 export default function RecentOrders() {
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Function to open/close the Sheet
+    const toggleSheet = () => {
+        setIsOpen(!isOpen)
+    }
     return (
         <div className="w-full md:w-1/2">
+            <SheetSide isOpen={isOpen} side="right" toggleOpen={toggleSheet}/>
             <Card className="">
-                <CardTitle className="text-lg sm:text-xl text-gray-800 mt-4 ml-4">Pedidos Recentes</CardTitle>
+                <CardTitle className="flex text-lg sm:text-xl text-gray-800 mt-4 ml-4">
+                    <span>Pedidos Recentes</span>
+                    <Button className="ml-auto mr-4" onClick={toggleSheet}>New</Button>
+                </CardTitle>
                 <Table>
                     <TableHeader>
                         <TableRow>

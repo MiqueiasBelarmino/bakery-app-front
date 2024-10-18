@@ -53,18 +53,6 @@ export default function DashboardPage() {
         <RecentOrders/>
         <RecentOrders/>
       </section>
-      <section className="mt-4 flex flex-col md:flex-row gap-4">
-        <RecentOrders/>
-        <RecentOrders/>
-      </section>
-      <section className="mt-4 flex flex-col md:flex-row gap-4">
-        <RecentOrders/>
-        <RecentOrders/>
-      </section>
-      <section className="mt-4 flex flex-col md:flex-row gap-4">
-        <RecentOrders/>
-        <RecentOrders/>
-      </section>
     </>
   )
 }
