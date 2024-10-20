@@ -1,5 +1,4 @@
-// src/utils/formatPrice.js
-export function formatPrice(amount: number) {
+export function formatPrice(amount: any) {
     return amount.toLocaleString("en-US", {
       style: "currency",
       currency: "BRL",

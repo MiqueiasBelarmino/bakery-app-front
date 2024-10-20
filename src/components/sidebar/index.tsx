@@ -5,10 +5,12 @@ import { Home, LogOut, Package, Package2, PanelBottom } from "lucide-react";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
-import { Minus, Plus, ShoppingCart, Trash2, Upload } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { removeFromCart, updateQuantity } from "@/slices/cart";
+import { formatPrice } from "@/utils/formatPrice";
 
 // Define the product type
 type Product = {
@@ -17,56 +19,31 @@ type Product = {
     price: number
     image: string
     description: string
-    cuisine: string
-    estimatedDelivery: string
-    rating: number
+    quantity: number;
 }
 
 // Define the cart item type
 type CartItem = Product & { quantity: number }
 
-// Sample product data
-const products: Product[] = [
-    { id: 1, name: "Margherita Pizza", price: 12.99, image: "/placeholder.svg?height=100&width=100", description: "Classic pizza with tomato sauce, mozzarella, and basil", cuisine: "Italian", estimatedDelivery: "30-40 min", rating: 4.5 },
-    { id: 2, name: "Chicken Tikka Masala", price: 14.99, image: "/placeholder.svg?height=100&width=100", description: "Grilled chicken in a creamy tomato sauce with Indian spices", cuisine: "Indian", estimatedDelivery: "35-45 min", rating: 4.7 },
-    { id: 3, name: "Beef Burger", price: 10.99, image: "/placeholder.svg?height=100&width=100", description: "Juicy beef patty with lettuce, tomato, and special sauce", cuisine: "American", estimatedDelivery: "25-35 min", rating: 4.3 },
-    { id: 4, name: "Pad Thai", price: 11.99, image: "/placeholder.svg?height=100&width=100", description: "Stir-fried rice noodles with shrimp, tofu, peanuts, and tamarind sauce", cuisine: "Thai", estimatedDelivery: "30-40 min", rating: 4.6 },
-    { id: 5, name: "Sushi Roll Combo", price: 18.99, image: "/placeholder.svg?height=100&width=100", description: "Assorted sushi rolls with soy sauce and wasabi", cuisine: "Japanese", estimatedDelivery: "35-45 min", rating: 4.8 },
-]
-
 export default function Sidebar() {
-    const [cart, setCart] = useState<CartItem[]>([])
+    const dispatch = useDispatch();
+    const cart = useSelector((state) => (state as any).cart.cart);
 
-    const addToCart = (product: Product) => {
-        setCart(currentCart => {
-            const existingItem = currentCart.find(item => item.id === product.id)
-            if (existingItem) {
-                return currentCart.map(item =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-                )
-            }
-            return [...currentCart, { ...product, quantity: 1 }]
-        })
+
+    const handleRemoveFromCart = (id: number) => {
+        dispatch(removeFromCart(id));
     }
 
-    const removeFromCart = (productId: number) => {
-        setCart(currentCart => currentCart.filter(item => item.id !== productId))
-    }
-
-    const updateQuantity = (productId: number, newQuantity: number) => {
-        if (newQuantity === 0) {
-            removeFromCart(productId)
+    const handleUpdateQuantity = (id: number, quantity: number) => {
+        if (quantity === 0) {
+            handleRemoveFromCart(id)
         } else {
-            setCart(currentCart =>
-                currentCart.map(item =>
-                    item.id === productId ? { ...item, quantity: newQuantity } : item
-                )
-            )
+            dispatch(updateQuantity({ id, quantity}));
         }
     }
 
     const calculateTotal = () => {
-        return cart.reduce((total, item) => total + item.price * item.quantity, 0)
+        return cart.reduce((total: number, item: Product) => total + item.price * item.quantity, 0)
     }
     return (
         <div className="flex w-full flex-col bg-muted/40">
@@ -146,38 +123,33 @@ export default function Sidebar() {
                                 <Button variant="outline" size="icon" className="relative">
                                     <ShoppingCart className="h-5 w-5" />
                                     <span className="sr-only">Open cart</span>
-                                    <Badge className="absolute -right-2 -top-2 h-6 w-6 rounded-full p-2">
-                                        {cart.reduce((total, item) => total + item.quantity, 0)}
+                                    <Badge className="absolute -right-2 -top-2 h-6 w-6 rounded-full flex items-center justify-center">
+                                        {cart?.length}
+                                        {/* {cart.reduce((total: number, item: Product) => total + item.quantity, 0)} */}
                                     </Badge>
                                 </Button>
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader>
-                                    <SheetTitle>Your Cart</SheetTitle>
+                                    <SheetTitle>Seu carrinho</SheetTitle>
                                     <SheetDescription>
-                                        Review your items before checking out
+                                        Revise seus itens antes de confirmar
                                     </SheetDescription>
                                 </SheetHeader>
                                 <div className="mt-8 space-y-4">
-                                    {cart.map((item) => (
+                                    {cart .map((item: Product) => (
                                         <div key={item.id} className="flex items-center justify-between">
                                             <div className="flex items-center space-x-4">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="h-16 w-16 rounded-md object-cover"
-                                                />
                                                 <div>
                                                     <h3 className="font-medium">{item.name}</h3>
-                                                    <p className="text-sm text-gray-500">{item.cuisine}</p>
-                                                    <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
+                                                    <p className="text-sm font-medium">{formatPrice(item.price)}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                                                 >
                                                     <Minus className="h-4 w-4" />
                                                 </Button>
@@ -185,14 +157,14 @@ export default function Sidebar() {
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => handleRemoveFromCart(item.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -204,12 +176,12 @@ export default function Sidebar() {
                                     <div className="mt-8 space-y-4">
                                         <div className="flex justify-between text-lg font-semibold">
                                             <span>Total:</span>
-                                            <span>${calculateTotal().toFixed(2)}</span>
+                                            <span>{formatPrice(calculateTotal())}</span>
                                         </div>
-                                        <Button className="w-full">Proceed to Checkout</Button>
+                                        <Button className="w-full">Confirmar Pedido</Button>
                                     </div>
                                 ) : (
-                                    <p className="mt-8 text-center text-gray-500">Your cart is empty</p>
+                                    <p className="mt-8 text-center text-gray-500">Seu carrinho está vazio</p>
                                 )}
                             </SheetContent>
                         </Sheet>
