@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Home, LogOut, Package, Package2, PanelBottom } from "lucide-react";
+import { CircleUser, Home, LogOut, Package, Package2, PanelBottom } from "lucide-react";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
@@ -11,19 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateQuantity } from "@/slices/cart";
 import { formatPrice } from "@/utils/formatPrice";
-
-// Define the product type
-type Product = {
-    id: number
-    name: string
-    price: number
-    image: string
-    description: string
-    quantity: number;
-}
-
-// Define the cart item type
-type CartItem = Product & { quantity: number }
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import Product from "@/models/product";
 
 export default function Sidebar() {
     const dispatch = useDispatch();
@@ -38,13 +27,18 @@ export default function Sidebar() {
         if (quantity === 0) {
             handleRemoveFromCart(id)
         } else {
-            dispatch(updateQuantity({ id, quantity}));
+            dispatch(updateQuantity({ id, quantity }));
         }
     }
 
     const calculateTotal = () => {
-        return cart.reduce((total: number, item: Product) => total + item.price * item.quantity, 0)
+        return cart.reduce((total: number, item: Partial<Product>) => total + (item.price ?? 0) * (item as any).quantity, 0)
     }
+
+    const handleOrderCreation = () => {
+        console.log(cart);
+    }
+
     return (
         <div className="flex w-full flex-col bg-muted/40">
 
@@ -137,7 +131,7 @@ export default function Sidebar() {
                                     </SheetDescription>
                                 </SheetHeader>
                                 <div className="mt-8 space-y-4">
-                                    {cart .map((item: Product) => (
+                                    {cart.map((item: Product) => (
                                         <div key={item.id} className="flex items-center justify-between">
                                             <div className="flex items-center space-x-4">
                                                 <div>
@@ -149,15 +143,15 @@ export default function Sidebar() {
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                                                    onClick={() => handleUpdateQuantity(item.id, (item as any).quantity - 1)}
                                                 >
                                                     <Minus className="h-4 w-4" />
                                                 </Button>
-                                                <span>{item.quantity}</span>
+                                                <span>{(item as any).quantity}</span>
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                                                    onClick={() => handleUpdateQuantity(item.id, (item as any).quantity + 1)}
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
@@ -174,11 +168,11 @@ export default function Sidebar() {
                                 </div>
                                 {cart.length > 0 ? (
                                     <div className="mt-8 space-y-4">
-                                        <div className="flex justify-between text-lg font-semibold">
+                                        <div className="flex justify-between text-lg font-semibold border-b-2 border-b-black/40">
                                             <span>Total:</span>
                                             <span>{formatPrice(calculateTotal())}</span>
                                         </div>
-                                        <Button className="w-full">Confirmar Pedido</Button>
+                                        <Button className="w-full" onClick={handleOrderCreation}>Confirmar Pedido</Button>
                                     </div>
                                 ) : (
                                     <p className="mt-8 text-center text-gray-500">Seu carrinho está vazio</p>
@@ -186,6 +180,22 @@ export default function Sidebar() {
                             </SheetContent>
                         </Sheet>
                     </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="secondary" size="icon" className="rounded-full">
+                                <CircleUser className="h-5 w-5" />
+                                <span className="sr-only">Toggle user menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Settings</DropdownMenuItem>
+                            <DropdownMenuItem>Support</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </header>
             </div>
 
